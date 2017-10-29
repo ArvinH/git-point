@@ -24,11 +24,21 @@ export class ToggleView extends Component {
     this.setState({ collapsed: !this.state.collapsed });
   }
 
+  renderTochableView() {
+    const { TouchableView } = this.props;
+
+    if (TouchableView instanceof Function) {
+      return TouchableView(this.state.collapsed);
+    }
+
+    return TouchableView;
+  }
+
   render() {
     return (
       <View>
         <TouchableOpacity onPress={() => this._toggle()}>
-          {this.props.TouchableView}
+          {this.renderTochableView()}
         </TouchableOpacity>
         <Collapsible collapsed={this.state.collapsed}>
           {this.props.children}

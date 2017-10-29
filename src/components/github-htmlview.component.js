@@ -81,6 +81,13 @@ const quotedEmailToggleStyle = {
   marginTop: 3,
 };
 
+const detailsToggleStyle = {
+  alignSelf: 'flex-start',
+  lineHeight: 15,
+  marginBottom: 6,
+  marginTop: 3,
+};
+
 const styleSheet = StyleSheet.create(styles);
 
 const { width } = Dimensions.get('window');
@@ -293,6 +300,48 @@ export class GithubHtmlView extends Component {
           }
 
           return undefined;
+        },
+        details: (node, index, siblings, parent, defaultRenderer) => {
+          const detailsChildren = node.children || [];
+          const childrendComponent = [];
+          let summaryText = 'details';
+
+          detailsChildren.forEach((child, childIdx) => {
+            if (child.type === 'tag' && child.name === 'summary') {
+              const summaryChild = child.children[0] || {};
+
+              summaryText = summaryChild.data || 'details';
+              summaryText = summaryText.replace(/\n/g, '');
+            } else if (renderers[child.name]) {
+              childrendComponent.push(
+                renderers[child.name](
+                  child,
+                  childIdx,
+                  siblings,
+                  node,
+                  defaultRenderer
+                )
+              );
+            } else {
+              childrendComponent.push(defaultRenderer(child.children, child));
+            }
+          });
+
+          return (
+            <ToggleView
+              TouchableView={collapse => {
+                const prefixNotation = collapse ? '▸' : '▾';
+
+                return (
+                  <Text
+                    style={detailsToggleStyle}
+                  >{`${prefixNotation} ${summaryText}`}</Text>
+                );
+              }}
+            >
+              {childrendComponent}
+            </ToggleView>
+          );
         },
         img: (node, index, siblings, parent, defaultRenderer) => {
           if (hasAncestor(node, ['ol', 'ul', 'span'])) {
