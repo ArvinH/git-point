@@ -6,6 +6,7 @@ export class ToggleView extends Component {
   props: {
     children: any,
     TouchableView: any,
+    TouchableStyle: any,
   };
 
   state: {
@@ -24,7 +25,7 @@ export class ToggleView extends Component {
     this.setState({ collapsed: !this.state.collapsed });
   }
 
-  renderTochableView() {
+  renderTouchableView() {
     const { TouchableView } = this.props;
 
     if (TouchableView instanceof Function) {
@@ -35,14 +36,14 @@ export class ToggleView extends Component {
   }
 
   render() {
+    const { children, TouchableStyle = {} } = this.props;
+
     return (
       <View>
-        <TouchableOpacity onPress={() => this._toggle()}>
-          {this.renderTochableView()}
+        <TouchableOpacity onPress={() => this._toggle()} style={TouchableStyle}>
+          {this.renderTouchableView()}
         </TouchableOpacity>
-        <Collapsible collapsed={this.state.collapsed}>
-          {this.props.children}
-        </Collapsible>
+        <Collapsible collapsed={this.state.collapsed}>{children}</Collapsible>
       </View>
     );
   }

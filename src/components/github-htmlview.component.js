@@ -81,11 +81,17 @@ const quotedEmailToggleStyle = {
   marginTop: 3,
 };
 
-const detailsToggleStyle = {
+const detailsSummaryStyle = {
   alignSelf: 'flex-start',
+  fontSize: normalize(15),
   lineHeight: 15,
   marginBottom: 6,
   marginTop: 3,
+};
+
+const detailsSummaryPrefixStyle = {
+  ...detailsSummaryStyle,
+  fontSize: normalize(20),
 };
 
 const styleSheet = StyleSheet.create(styles);
@@ -303,17 +309,35 @@ export class GithubHtmlView extends Component {
         },
         details: (node, index, siblings, parent, defaultRenderer) => {
           const detailsChildren = node.children || [];
-          const childrendComponent = [];
-          let summaryText = 'details';
+          const hiddenChildren = [];
+          let summaryComponent = 'details';
 
           detailsChildren.forEach((child, childIdx) => {
             if (child.type === 'tag' && child.name === 'summary') {
               const summaryChild = child.children[0] || {};
 
-              summaryText = summaryChild.data || 'details';
-              summaryText = summaryText.replace(/\n/g, '');
+              if (renderers[summaryChild.name]) {
+                summaryComponent = renderers[summaryChild.name](
+                  summaryChild,
+                  childIdx,
+                  siblings,
+                  child,
+                  defaultRenderer
+                );
+              } else if (summaryChild.type === 'text') {
+                summaryComponent = summaryChild.data;
+                summaryComponent = summaryComponent.replace(/\n/g, '');
+                summaryComponent = (
+                  <Text style={detailsSummaryStyle}>{summaryComponent}</Text>
+                );
+              } else {
+                summaryComponent = defaultRenderer(
+                  summaryChild.children,
+                  child
+                );
+              }
             } else if (renderers[child.name]) {
-              childrendComponent.push(
+              hiddenChildren.push(
                 renderers[child.name](
                   child,
                   childIdx,
@@ -322,24 +346,32 @@ export class GithubHtmlView extends Component {
                   defaultRenderer
                 )
               );
-            } else {
-              childrendComponent.push(defaultRenderer(child.children, child));
+            } else if (child.children) {
+              hiddenChildren.push(defaultRenderer(child.children, child));
+            } else if (child.data !== '\n') {
+              hiddenChildren.push(
+                <Text style={textStyle}>{child.data.replace(/\n/g, '')}</Text>
+              );
             }
           });
 
           return (
             <ToggleView
               TouchableView={collapse => {
-                const prefixNotation = collapse ? '▸' : '▾';
+                const prefix = collapse ? '▸' : '▾';
 
-                return (
-                  <Text
-                    style={detailsToggleStyle}
-                  >{`${prefixNotation} ${summaryText}`}</Text>
-                );
+                return [
+                  <Text style={detailsSummaryPrefixStyle}>{prefix}</Text>,
+                  summaryComponent,
+                ];
+              }}
+              TouchableStyle={{
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
               }}
             >
-              {childrendComponent}
+              {hiddenChildren}
             </ToggleView>
           );
         },
