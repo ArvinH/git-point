@@ -256,7 +256,9 @@ export class GithubHtmlView extends Component {
           <View key={index}>{defaultRenderer(node.children, node)}</View>
         ),
         code: (node, index, siblings, parent, defaultRenderer) => {
-          if (parent.name === 'pre' || parent.name === 'summary') {
+          const parentName = (parent && parent.name) || '';
+
+          if (parentName === 'pre' || parentName === 'summary') {
             return (
               <SyntaxHighlighter
                 key={index}
@@ -313,7 +315,6 @@ export class GithubHtmlView extends Component {
           let summaryComponent = 'details';
 
           detailsChildren.forEach((child, childIdx) => {
-            console.log('detail child -- ', child);
             if (child.type === 'tag' && child.name === 'summary') {
               const summaryChild = child.children[0] || {};
 
