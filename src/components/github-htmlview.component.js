@@ -84,7 +84,7 @@ const quotedEmailToggleStyle = {
 const detailsSummaryStyle = {
   alignSelf: 'flex-start',
   fontSize: normalize(15),
-  lineHeight: 15,
+  lineHeight: 20,
   marginBottom: 6,
   marginTop: 3,
 };
